@@ -90,31 +90,30 @@ export function normalizeFeatureCollection(
 
 export function filterFeatures(
   fc: CountryFeatureCollection,
-  continent: string,
   subregion: string,
 ): CountryFeatureCollection {
   const features = fc.features.filter((f) => {
-    const p = f.properties;
-    if (continent !== "ALL" && p.continent !== continent) return false;
-    if (subregion !== "ALL" && p.subregion !== subregion) return false;
+    if (subregion !== "ALL" && f.properties.subregion !== subregion) return false;
     return true;
   });
   return { type: "FeatureCollection", features };
 }
 
-export function uniqueContinents(fc: CountryFeatureCollection): string[] {
-  return [...new Set(fc.features.map((f) => f.properties.continent))].sort();
+export function uniqueSubregions(fc: CountryFeatureCollection): string[] {
+  return [...new Set(fc.features.map((f) => f.properties.subregion))].sort();
 }
 
-export function uniqueSubregions(
+export function uniqueCountries(
   fc: CountryFeatureCollection,
-  continent: string,
-): string[] {
+  subregion: string,
+): CountryFeature[] {
   const scope =
-    continent === "ALL"
+    subregion === "ALL"
       ? fc.features
-      : fc.features.filter((f) => f.properties.continent === continent);
-  return [...new Set(scope.map((f) => f.properties.subregion))].sort();
+      : fc.features.filter((f) => f.properties.subregion === subregion);
+  return [...scope].sort((a, b) =>
+    a.properties.name.localeCompare(b.properties.name),
+  );
 }
 
 export function bboxOf(fc: CountryFeatureCollection): [number, number, number, number] | null {

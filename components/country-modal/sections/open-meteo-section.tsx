@@ -17,10 +17,11 @@ export function OpenMeteoSection({
   const { data, isLoading, error } = useOpenMeteo(iso3, lat, lon);
 
   if (isLoading) return <Skeleton className="h-24 w-full" />;
-  if (error) return <p className="text-sm text-red-500">Ошибка: {(error as Error).message}</p>;
+  if (error)
+    return <p className="text-sm text-red-500 dark:text-red-400">Ошибка: {(error as Error).message}</p>;
   if (!data || !data.ok) {
     return (
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
         {data && "message" in data ? data.message : "Данные временно недоступны"}
       </p>
     );
@@ -35,7 +36,9 @@ export function OpenMeteoSection({
         </CardHeader>
         <CardContent>
           <div className="text-xl font-semibold">{cur.temperatureC.toFixed(1)}°C</div>
-          <div className="text-xs text-zinc-500">{describeWeatherCode(cur.weatherCode)}</div>
+          <div className="text-xs text-zinc-500 dark:text-zinc-400">
+            {describeWeatherCode(cur.weatherCode)}
+          </div>
         </CardContent>
       </Card>
       <Card>
@@ -56,7 +59,7 @@ export function OpenMeteoSection({
           <div className="text-xl font-semibold">
             {cur.windKph != null ? `${cur.windKph} км/ч` : "—"}
           </div>
-          <div className="text-xs text-zinc-500">
+          <div className="text-xs text-zinc-500 dark:text-zinc-400">
             {new Date(cur.time).toLocaleString()}
           </div>
         </CardContent>

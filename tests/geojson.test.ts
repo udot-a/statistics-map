@@ -5,7 +5,7 @@ import {
   featureCenter,
   filterFeatures,
   normalizeFeatureCollection,
-  uniqueContinents,
+  uniqueCountries,
   uniqueSubregions,
   findByIso3,
 } from "@/lib/geojson";
@@ -127,33 +127,30 @@ describe("normalizeFeatureCollection", () => {
 describe("filterFeatures", () => {
   const fc = normalizeFeatureCollection(sampleRaw);
 
-  it("returns all when continent=ALL, subregion=ALL", () => {
-    expect(filterFeatures(fc, "ALL", "ALL").features.length).toBe(3);
-  });
-
-  it("filters by continent", () => {
-    const eu = filterFeatures(fc, "Europe", "ALL");
-    expect(eu.features.map((f) => f.properties.iso3).sort()).toEqual(["DEU", "FRA"]);
+  it("returns all when subregion=ALL", () => {
+    expect(filterFeatures(fc, "ALL").features.length).toBe(3);
   });
 
   it("filters by subregion", () => {
-    const res = filterFeatures(fc, "Europe", "Western Europe");
-    expect(res.features.length).toBe(2);
+    const res = filterFeatures(fc, "Western Europe");
+    expect(res.features.map((f) => f.properties.iso3).sort()).toEqual(["DEU", "FRA"]);
   });
 
-  it("returns empty for unknown continent", () => {
-    expect(filterFeatures(fc, "Mars", "ALL").features).toEqual([]);
+  it("returns empty for unknown subregion", () => {
+    expect(filterFeatures(fc, "Mars").features).toEqual([]);
   });
 });
 
 describe("misc helpers", () => {
   const fc = normalizeFeatureCollection(sampleRaw);
-  it("uniqueContinents returns distinct continents", () => {
-    expect(uniqueContinents(fc).sort()).toEqual(["Africa", "Europe"]);
+  it("uniqueSubregions returns distinct subregions", () => {
+    expect(uniqueSubregions(fc).sort()).toEqual(["Northern Africa", "Western Europe"]);
   });
-  it("uniqueSubregions respects continent scope", () => {
-    expect(uniqueSubregions(fc, "Europe")).toEqual(["Western Europe"]);
-    expect(uniqueSubregions(fc, "ALL").sort()).toEqual(["Northern Africa", "Western Europe"]);
+  it("uniqueCountries respects subregion scope and sorts by name", () => {
+    const all = uniqueCountries(fc, "ALL").map((c) => c.properties.iso3);
+    expect(all.sort()).toEqual(["DEU", "EGY", "FRA"]);
+    const eu = uniqueCountries(fc, "Western Europe").map((c) => c.properties.iso3);
+    expect(eu.sort()).toEqual(["DEU", "FRA"]);
   });
   it("bboxOf aggregates across features", () => {
     const bbox = bboxOf(fc);

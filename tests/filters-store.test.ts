@@ -3,7 +3,6 @@ import { useFiltersStore } from "@/stores/filters.store";
 
 function resetStore() {
   useFiltersStore.setState({
-    continent: "ALL",
     subregion: "ALL",
     dataSources: ["worldbank", "openmeteo", "unesco"],
     selectedIso3: null,
@@ -14,11 +13,17 @@ function resetStore() {
 describe("filters store", () => {
   beforeEach(() => resetStore());
 
-  it("setContinent resets subregion to ALL", () => {
-    useFiltersStore.getState().setSubregion("Western Europe");
-    useFiltersStore.getState().setContinent("Asia");
-    expect(useFiltersStore.getState().subregion).toBe("ALL");
-    expect(useFiltersStore.getState().continent).toBe("Asia");
+  it("setSubregion clears selectedIso3 when switching away from ALL", () => {
+    useFiltersStore.getState().selectCountry({ iso3: "FRA", subregion: "Western Europe" });
+    useFiltersStore.getState().setSubregion("Northern Africa");
+    expect(useFiltersStore.getState().subregion).toBe("Northern Africa");
+    expect(useFiltersStore.getState().selectedIso3).toBeNull();
+  });
+
+  it("setSubregion back to ALL keeps selected country", () => {
+    useFiltersStore.getState().selectCountry({ iso3: "FRA", subregion: "Western Europe" });
+    useFiltersStore.getState().setSubregion("ALL");
+    expect(useFiltersStore.getState().selectedIso3).toBe("FRA");
   });
 
   it("toggleDataSource removes and re-adds", () => {
@@ -37,10 +42,27 @@ describe("filters store", () => {
   });
 
   it("selectCountry opens modal and stores iso3", () => {
-    useFiltersStore.getState().selectCountry("FRA");
+    useFiltersStore.getState().selectCountry({ iso3: "FRA" });
     expect(useFiltersStore.getState().selectedIso3).toBe("FRA");
     expect(useFiltersStore.getState().modalOpen).toBe(true);
     useFiltersStore.getState().closeModal();
+    expect(useFiltersStore.getState().modalOpen).toBe(false);
+  });
+
+  it("selectCountry syncs subregion filter", () => {
+    useFiltersStore.getState().selectCountry({
+      iso3: "FRA",
+      subregion: "Western Europe",
+    });
+    expect(useFiltersStore.getState().selectedIso3).toBe("FRA");
+    expect(useFiltersStore.getState().subregion).toBe("Western Europe");
+    expect(useFiltersStore.getState().modalOpen).toBe(true);
+  });
+
+  it("clearCountry resets selection and closes modal", () => {
+    useFiltersStore.getState().selectCountry({ iso3: "FRA" });
+    useFiltersStore.getState().clearCountry();
+    expect(useFiltersStore.getState().selectedIso3).toBeNull();
     expect(useFiltersStore.getState().modalOpen).toBe(false);
   });
 });

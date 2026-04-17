@@ -11,17 +11,22 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useFiltersStore } from "@/stores/filters.store";
 import { useCountriesGeoJson } from "@/hooks/use-country-data";
-import { normalizeFeatureCollection, uniqueContinents, uniqueSubregions } from "@/lib/geojson";
+import {
+  normalizeFeatureCollection,
+  uniqueCountries,
+  uniqueSubregions,
+} from "@/lib/geojson";
 import { DATA_SOURCES } from "@/lib/constants";
 import type { DataSourceId } from "@/types/geo";
 
 export function FilterPanel() {
   const { data: rawGeo } = useCountriesGeoJson();
-  const continent = useFiltersStore((s) => s.continent);
   const subregion = useFiltersStore((s) => s.subregion);
+  const selectedIso3 = useFiltersStore((s) => s.selectedIso3);
   const sources = useFiltersStore((s) => s.dataSources);
-  const setContinent = useFiltersStore((s) => s.setContinent);
   const setSubregion = useFiltersStore((s) => s.setSubregion);
+  const selectCountry = useFiltersStore((s) => s.selectCountry);
+  const clearCountry = useFiltersStore((s) => s.clearCountry);
   const toggleDataSource = useFiltersStore((s) => s.toggleDataSource);
 
   const normalized = useMemo(() => {
@@ -31,42 +36,38 @@ export function FilterPanel() {
     );
   }, [rawGeo]);
 
-  const continents = useMemo(
-    () => (normalized ? uniqueContinents(normalized) : []),
+  const subregions = useMemo(
+    () => (normalized ? uniqueSubregions(normalized) : []),
     [normalized],
   );
-  const subregions = useMemo(
-    () => (normalized ? uniqueSubregions(normalized, continent) : []),
-    [normalized, continent],
+  const countries = useMemo(
+    () => (normalized ? uniqueCountries(normalized, subregion) : []),
+    [normalized, subregion],
   );
+
+  const onPickCountry = (iso3: string) => {
+    if (iso3 === "NONE") {
+      clearCountry();
+      return;
+    }
+    const country = countries.find((c) => c.properties.iso3 === iso3);
+    if (!country) return;
+    selectCountry({
+      iso3,
+      subregion: country.properties.subregion,
+    });
+  };
 
   return (
     <div className="flex flex-wrap items-end gap-4 p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur">
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-zinc-500">Континент</label>
-        <Select value={continent} onValueChange={setContinent}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Континент" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Все</SelectItem>
-            {continents.map((c) => (
-              <SelectItem key={c} value={c}>
-                {c}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="text-xs text-zinc-500">Регион (ООН)</label>
+        <label className="text-xs text-zinc-500 dark:text-zinc-400">Регион / Область</label>
         <Select value={subregion} onValueChange={setSubregion}>
-          <SelectTrigger className="w-56">
-            <SelectValue placeholder="Регион" />
+          <SelectTrigger className="w-64">
+            <SelectValue placeholder="Все регионы" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">Все</SelectItem>
+            <SelectItem value="ALL">Все регионы</SelectItem>
             {subregions.map((s) => (
               <SelectItem key={s} value={s}>
                 {s}
@@ -76,8 +77,25 @@ export function FilterPanel() {
         </Select>
       </div>
 
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-zinc-500 dark:text-zinc-400">Страна</label>
+        <Select value={selectedIso3 ?? "NONE"} onValueChange={onPickCountry}>
+          <SelectTrigger className="w-64">
+            <SelectValue placeholder="Выберите страну" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="NONE">— не выбрана —</SelectItem>
+            {countries.map((c) => (
+              <SelectItem key={c.properties.iso3} value={c.properties.iso3}>
+                {c.properties.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="flex flex-col gap-2">
-        <label className="text-xs text-zinc-500">Источники данных</label>
+        <label className="text-xs text-zinc-500 dark:text-zinc-400">Источники данных</label>
         <div className="flex items-center gap-4">
           {DATA_SOURCES.map((ds) => {
             const checked = sources.includes(ds.id as DataSourceId);

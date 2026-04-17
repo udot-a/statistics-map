@@ -26,7 +26,10 @@ export const CardTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<H
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("text-xs font-medium uppercase tracking-wide text-zinc-500", className)}
+      className={cn(
+        "text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400",
+        className,
+      )}
       {...props}
     />
   ),

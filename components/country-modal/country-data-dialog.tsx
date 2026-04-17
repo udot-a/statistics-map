@@ -40,7 +40,9 @@ export function CountryDataDialog() {
           <DialogTitle>
             {country?.properties.name ?? selectedIso3 ?? "Страна"}
             {selectedIso3 ? (
-              <span className="ml-2 text-xs font-normal text-zinc-500">{selectedIso3}</span>
+              <span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">
+                {selectedIso3}
+              </span>
             ) : null}
           </DialogTitle>
           {country ? (
@@ -84,7 +86,7 @@ export function CountryDataDialog() {
             )}
           </Tabs>
         ) : (
-          <p className="text-sm text-zinc-500">Загрузка страны...</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Загрузка страны...</p>
         )}
       </DialogContent>
     </Dialog>

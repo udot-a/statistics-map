@@ -40,12 +40,12 @@ export function WorldBankSection({ iso3 }: { iso3: string }) {
   }
 
   if (error) {
-    return <p className="text-sm text-red-500">Ошибка: {(error as Error).message}</p>;
+    return <p className="text-sm text-red-500 dark:text-red-400">Ошибка: {(error as Error).message}</p>;
   }
 
   if (!data || !data.ok) {
     return (
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
         {data && "message" in data ? data.message : "Данные временно недоступны"}
       </p>
     );
@@ -65,7 +65,9 @@ export function WorldBankSection({ iso3 }: { iso3: string }) {
           </CardHeader>
           <CardContent>
             <div className="text-xl font-semibold">{formatNumber(popLast?.value)}</div>
-            <div className="text-xs text-zinc-500">{popLast ? popLast.year : "нет данных"}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400">
+              {popLast ? popLast.year : "нет данных"}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -74,7 +76,9 @@ export function WorldBankSection({ iso3 }: { iso3: string }) {
           </CardHeader>
           <CardContent>
             <div className="text-xl font-semibold">{formatUsd(gdpLast?.value)}</div>
-            <div className="text-xs text-zinc-500">{gdpLast ? gdpLast.year : "нет данных"}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400">
+              {gdpLast ? gdpLast.year : "нет данных"}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -85,7 +89,9 @@ export function WorldBankSection({ iso3 }: { iso3: string }) {
             <div className="text-xl font-semibold">
               {lifeLast ? `${lifeLast.value.toFixed(1)} лет` : "—"}
             </div>
-            <div className="text-xs text-zinc-500">{lifeLast ? lifeLast.year : "нет данных"}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400">
+              {lifeLast ? lifeLast.year : "нет данных"}
+            </div>
           </CardContent>
         </Card>
       </div>

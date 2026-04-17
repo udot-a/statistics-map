@@ -9,5 +9,11 @@ const WorldMap = dynamic(() => import("./world-map"), {
 });
 
 export function DynamicMap() {
-  return <WorldMap />;
+  return (
+    <div className="relative flex-1 min-h-0 w-full">
+      <div className="absolute inset-0">
+        <WorldMap />
+      </div>
+    </div>
+  );
 }

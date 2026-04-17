@@ -4,31 +4,28 @@ import { create } from "zustand";
 import type { DataSourceId } from "@/types/geo";
 
 export type FiltersState = {
-  continent: string; // 'ALL' or continent name
   subregion: string; // 'ALL' or subregion name
   dataSources: DataSourceId[];
   selectedIso3: string | null;
   modalOpen: boolean;
-  setContinent: (c: string) => void;
   setSubregion: (s: string) => void;
   toggleDataSource: (id: DataSourceId) => void;
   setDataSources: (ids: DataSourceId[]) => void;
-  selectCountry: (iso3: string) => void;
+  selectCountry: (country: { iso3: string; subregion?: string }) => void;
+  clearCountry: () => void;
   closeModal: () => void;
 };
 
 export const useFiltersStore = create<FiltersState>((set) => ({
-  continent: "ALL",
   subregion: "ALL",
   dataSources: ["worldbank", "openmeteo", "unesco"],
   selectedIso3: null,
   modalOpen: false,
-  setContinent: (c) =>
-    set(() => ({
-      continent: c,
-      subregion: "ALL",
+  setSubregion: (s) =>
+    set((state) => ({
+      subregion: s,
+      selectedIso3: s === "ALL" ? state.selectedIso3 : null,
     })),
-  setSubregion: (s) => set({ subregion: s }),
   toggleDataSource: (id) =>
     set((state) => {
       const has = state.dataSources.includes(id);
@@ -38,6 +35,12 @@ export const useFiltersStore = create<FiltersState>((set) => ({
       return { dataSources: next.length > 0 ? next : state.dataSources };
     }),
   setDataSources: (ids) => set({ dataSources: ids }),
-  selectCountry: (iso3) => set({ selectedIso3: iso3, modalOpen: true }),
+  selectCountry: ({ iso3, subregion }) =>
+    set((state) => ({
+      selectedIso3: iso3,
+      modalOpen: true,
+      subregion: subregion ?? state.subregion,
+    })),
+  clearCountry: () => set({ selectedIso3: null, modalOpen: false }),
   closeModal: () => set({ modalOpen: false }),
 }));
